@@ -1,0 +1,47 @@
+--- RCPTT testcase ---
+Format-Version: 1.0
+Contexts: _zV9x4B7REeSLep-9G-ZHeQ
+Element-Name: TestCase1
+Element-Type: testcase
+Element-Version: 3.0
+External-Reference: 
+Id: _fqnBkB7REeSLep-9G-ZHeQ
+Runtime-Version: 1.5.0.201406151150
+Save-Time: 8/11/14 3:53 PM
+Testcase-Type: ecl
+
+------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac
+Content-Type: text/ecl
+Entry-Name: .content
+
+get-menu "File/New/Mobile App Project" | click
+with [get-window "New Mobile App Project"] {
+    get-table | get-item Classic | click
+    get-label -after [get-label "Available Templates:"] | click
+    get-button "Next >" | click
+    get-editbox -after [get-label "Project name:"] | set-text TestDemo1
+    with [get-group "Project Settings"] {
+        get-editbox -after [get-label "App Id:"] | set-text "com.appc.demo1"
+        get-button "Mobile Web" | uncheck
+    }
+    get-button Finish | click
+}
+with [get-view "Project Explorer" | get-tree] {
+    get-item "TestDemo1/Resources" | click
+    get-item "TestDemo1/Resources/app.js" | click
+    select "TestDemo1/Resources/app.js" | double-click
+    get-item "TestDemo1/tiapp.xml" | click
+    select "TestDemo1/tiapp.xml" | double-click
+}
+with [get-editor "TiApp Editor"] {
+    get-section "Deployment Targets" | get-button "Mobile Web" | get-property selected | equals false | verify-true
+    get-section Application | get-editbox -after [get-label "Application Id:"] | get-property text 
+        | equals "com.appc.demo1" | verify-true
+}
+with [get-view "Project Explorer" | get-tree] {
+    get-item TestDemo1 | click
+    select TestDemo1 | get-menu "Run As/8 iPhone" | click
+}
+wait 2000
+exec-process "/Applications/SikuliX-IDE.app/Contents/runIDE""-r" "\"/Users/kvelummaylum/Sikuli/Projects/helloworld.sikuli\"""-s"-ignoreExitCode
+------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--
