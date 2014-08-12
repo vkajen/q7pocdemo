@@ -1,13 +1,13 @@
 --- RCPTT testcase ---
 Format-Version: 1.0
-Contexts: _zV9x4B7REeSLep-9G-ZHeQ
+Contexts: _y0ARECICEeSNosyVI5RXGg,_zV9x4B7REeSLep-9G-ZHeQ
 Element-Name: TestCase1
 Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _fqnBkB7REeSLep-9G-ZHeQ
 Runtime-Version: 1.5.0.201406151150
-Save-Time: 8/11/14 3:53 PM
+Save-Time: 8/12/14 5:43 PM
 Testcase-Type: ecl
 
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac
@@ -42,6 +42,13 @@ with [get-view "Project Explorer" | get-tree] {
     get-item TestDemo1 | click
     select TestDemo1 | get-menu "Run As/8 iPhone" | click
 }
-wait 2000
+// Loop till the app is launched in the simulator
+loop [val count 0] {
+	if [get-view Console | get-text-viewer | get-property text -raw | matches "^[\d\D\s]*Application started[\d\D\s]*$"] {
+	 	//No code here as of now
+	} -else {
+		recur [$count | plus 1]
+	}
+} 
 exec-process "/Applications/SikuliX-IDE.app/Contents/runIDE""-r" "\"/Users/kvelummaylum/Sikuli/Projects/helloworld.sikuli\"""-s"-ignoreExitCode
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--
