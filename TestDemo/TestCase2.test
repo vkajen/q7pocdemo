@@ -1,49 +1,98 @@
 --- RCPTT testcase ---
 Format-Version: 1.0
-Contexts: _KKw_YB7SEeSLep-9G-ZHeQ
+Contexts: _y0ARECICEeSNosyVI5RXGg,_44Tn0CE8EeSz3JbggfyFLQ
 Element-Name: TestCase2
 Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _iha2oB7REeSLep-9G-ZHeQ
 Runtime-Version: 1.5.0.201406151150
-Save-Time: 8/11/14 2:49 PM
+Save-Time: 8/12/14 5:16 PM
 Testcase-Type: ecl
 
+------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
+Content-Type: text/plain
+Entry-Name: .description
+
+This test case is written to demonstrate the automation of debug feature testing process.
+------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa--
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac
 Content-Type: text/ecl
 Entry-Name: .content
 
-with [get-editor "app.js"] {
-    get-text-viewer | hover-text 15 11
-    with [get-left-ruler | get-ruler-column AnnotationColumn] {
-        double-click-ruler 17
-        double-click-ruler 18
-    }
+// Open app.js file in editor window
+with [get-view "Project Explorer" | get-tree] {
+    get-item TestDemo2 | click
+    select TestDemo2 | double-click
+    get-item "TestDemo2/Resources" | click
+    select "TestDemo2/Resources" | double-click
+    get-item "TestDemo2/Resources/app.js" | click
+    select "TestDemo2/Resources/app.js" | double-click
 }
+
+// place break points on line 8 and 17
+with [get-editor "app.js" | get-left-ruler | get-ruler-column AnnotationColumn] {
+    double-click-ruler 8
+    double-click-ruler 17
+}
+
+// start debug
 with [get-view "Project Explorer" | get-tree] {
     get-item TestDemo2 | click
     select TestDemo2 | get-menu "Debug As/6 iPhone" | click
 }
+
+// studio should ask to switch in debug perspective
 get-window "Confirm Perspective Switch" | get-button Yes | click
-with [get-editor "app.js"] {
-    get-left-ruler | get-ruler-column AnnotationColumn | hover-ruler -line 17
-    get-text-viewer | hover-text 17 5
+
+// confirm the switching process
+with [get-button Debug] {
+    get-property tooltip | equals Debug | verify-true
+    get-property selected | equals true | verify-true
 }
-with [get-editor "app.js"] {
-    get-text-viewer | hover-text 15 13
-    with [get-left-ruler | get-ruler-column AnnotationColumn] {
-        hover-ruler -line 17
-        hover-ruler -line 17
+
+// Open expression window in order to watch variables
+get-menu "Window/Show View/Expressions" | click
+with [get-view Expressions | get-tree] {
+    select "Add new expression" | activate-cell-edit
+    get-item "Add new expression" | click
+    with [get-editbox] {
+        set-text abc
+        key-type Enter
     }
-    with [get-left-ruler | get-ruler-column AnnotationColumn] {
-        hover-ruler -line 17
-        hover-ruler -line 17
-    }
-    get-left-ruler | get-ruler-column AnnotationColumn | hover-ruler -line 17
+    apply-cell-edit -deactivate
 }
-get-window -from "InformationControl.<init>()" | get-editbox | get-property text 
-    | equals "JS breakpoint [/TestDemo2/Resources/app.js,line: 17]" | verify-true
+
+// confirm that execution stops at break point
+get-view Debug | get-tree 
+    | get-item "Appcelerator iOS Simulator - iPhone - TestDemo2 \\[Appcelerator iOS Simulator\\]/iOS JS Debugger/Thread \\[kroll$1\\] \\(Suspended \\(breakpoint at line 8 in \\/TestDemo2\\/Resources\\/app.js\\)\\)/\\[Top-level script\\] \\[app.js:8\\]" 
+    | get-property "getText()" | equals "[Top-level script] [app.js:8]" | verify-true
+
+// resume and check the value of 'abc' before addition
+get-button "Resume (F8)" | click
+get-view Debug | get-tree 
+    | get-item "Appcelerator iOS Simulator - iPhone - TestDemo2 \\[Appcelerator iOS Simulator\\]/iOS JS Debugger/Thread \\[kroll$1\\] \\(Suspended \\(breakpoint at line 17 in \\/TestDemo2\\/Resources\\/app.js\\)\\)/\\[Top-level script\\] \\[app.js:17\\]" 
+    | get-property "getText()" | equals "[Top-level script] [app.js:17]" | verify-true
+with [get-view Expressions | get-tree] {
+    get-item "\"abc\"" | get-property "columns[0]" | equals "\"abc\"" | verify-true
+    get-item "\"abc\"" | get-property "columns[1]" | equals 100 | verify-true
+}
+
+// step over the equation and check the new value of 'abc'
+get-button "Step Over (F6)" | click
+with [get-view Expressions | get-tree] {
+    get-item "\"abc\"" | get-property "columns[0]" | equals "\"abc\"" | verify-true
+    get-item "\"abc\"" | get-property "columns[1]" | equals 110 | verify-true
+}
+get-view Debug | get-tree 
+    | get-item "Appcelerator iOS Simulator - iPhone - TestDemo2 \\[Appcelerator iOS Simulator\\]/iOS JS Debugger/Thread \\[kroll$1\\] \\(Suspended\\)/\\[Top-level script\\] \\[app.js:18\\]" 
+    | get-property "getText()" | equals "[Top-level script] [app.js:18]" | verify-true
 get-button "Resume (F8)" | click
 
+// remove the variable 'abc' from expression window
+with [get-view Expressions | get-tree] {
+    select "\"abc\"" | get-menu Remove | click
+}
+wait 2000
+get-view Console | get-text-viewer | get-property text | equals "[INFO] The value for the variable is:110" | verify-true
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--
