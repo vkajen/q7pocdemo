@@ -18,5 +18,6 @@ Steps to setting up:
 4. Click the "Execute" button to run the test cases.
 
 Sikuli Set up:
+	
 	i. Download and install Sikuli (https://launchpad.net/sikuli/sikulix/1.0.1/+download/sikuli-setup.jar)
 	ii. Update test case 1 from your installation path.
