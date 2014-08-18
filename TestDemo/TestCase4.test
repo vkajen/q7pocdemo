@@ -1,0 +1,103 @@
+--- RCPTT testcase ---
+Format-Version: 1.0
+Contexts: _zV9x4B7REeSLep-9G-ZHeQ
+Element-Name: TestCase4
+Element-Type: testcase
+Element-Version: 3.0
+External-Reference: 
+Id: _1lOqcCIhEeS115VZsy6CKA
+Runtime-Version: 1.5.0.201406151150
+Save-Time: 8/12/14 11:34 PM
+Testcase-Type: ecl
+
+------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac
+Content-Type: text/ecl
+Entry-Name: .content
+
+//Create a new project
+get-menu "File/New/Mobile App Project" | click
+with [get-window "New Mobile App Project"] {
+    get-table | get-item Classic | click
+    get-label -after [get-label "Available Templates:"] | click
+    get-button "Next >" | click
+    get-editbox -after [get-label "Project name:"] | set-text TestDemo4
+    with [get-group "Project Settings"] {
+        get-editbox -after [get-label "App Id:"] | set-text "com.appc.demo4"
+    }
+    get-button Finish | click
+}
+with [get-view "Project Explorer"] {
+    with [get-tree] {
+        get-item "TestDemo4/Resources/app.js" | click
+        select "TestDemo4/Resources/app.js" | double-click
+        get-item "TestDemo4/Resources/app.js" | click
+        get-item TestDemo4 | click
+    }
+    // Enable liveview, along with checking if its already enabled
+    if [get-view "Project Explorer" | get-button "Enable Liveview" | get-property selected -raw | equals true] {
+    	get-button "Enable Liveview" | click
+    	get-button "Enable Liveview" | click
+    } -else {get-button "Enable Liveview" | click}
+}
+get-view "Project Explorer" | get-button "Enable Liveview" | get-property selected | equals true | verify-true
+
+with [get-editor "app.js" | get-text-viewer] {
+    set-caret-pos 28 1
+    type-text "Ti.API.info(label1.text"
+    key-type Right
+    type-text ";"
+    //key-type "M1+s"
+}
+
+get-menu "File/Save" | click
+
+//Launch the app in simulator
+with [get-view "Project Explorer" | get-tree] {
+    get-item TestDemo4 | click
+    select TestDemo4 | get-menu "Run As/iPhone Retina (4 inch 64-bit)" | click
+}
+
+// Loop till the app is launched in the simulator
+loop [val count 0] {
+	if [get-view Console | get-text-viewer | get-property text -raw | matches "^[\d\D\s]*Application started[\d\D\s]*$"] {
+	 	//No code here as of now
+	} -else {
+		recur [$count | plus 1]
+	}
+} 
+//Check if liveview message is shown in console
+get-view Console | get-text-viewer | get-property text -raw | matches "^[\d\D\s]*\[LiveView\] Client connected[\d\D\s]*$" | assert-true -message "The LiveView client got connected successfully"
+
+get-view Console | get-text-viewer | get-property text -raw | matches [concat "^[\d\D\s]*\[INFO\] :   I am Window " "1" "[\d\D\s]*$"] | assert-true -message "On launch Ti.API.info message found"
+
+// Loop 5 times to check that small change in code is reflected. This is checked by testing the the console log output
+// which is the value of the label text on the window.
+repeat [val index] -times 5 -command {
+	//console cleared to check everytime that liveview gets connected
+	get-view Console | get-button "Clear Console" | click
+	// this is needed for search
+	with [get-editor "app.js" | get-text-viewer] {
+    set-caret-pos 23 1
+    }
+    // search label text and replace it with other text. This is dynamic by using loop index value in label text
+	get-menu "Search/Search..." | click
+	with [get-window Search] {
+	    get-combo -after [get-label "Containing text:"] | set-text [concat "text:\'I am Window " [$index | plus 1 | str] "\'"]
+	    get-group Scope | get-button "Selected resources" | click
+	    get-button "Replace..." | click
+	}
+	with [get-window "Replace Text Matches"] {
+	    get-combo -after [get-label "With:"] | set-text [concat "text:\'I am Window " [$index | plus 2 | str] "\'"]
+	    get-button OK | click
+	}
+
+	//get-menu "File/Save" | click
+	wait 1000
+	// check updated console log after liveview updates the app
+	get-view Console | get-text-viewer | get-property text -raw | matches [concat "^[\d\D\s]*\[INFO\] :   I am Window " [$index | plus 2 | str] "[\d\D\s]*$"] | assert-true -message [concat "Liveview code updated for iteration" [$index | plus 1 | str]]
+	
+	get-view Console | get-text-viewer | get-property text -raw | matches "^[\d\D\s]*\[LiveView\] Client connected[\d\D\s]*$" | assert-true -message "The LiveView client got connected successfully"
+}
+
+
+------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--

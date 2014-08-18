@@ -1,13 +1,13 @@
 --- RCPTT testcase ---
 Format-Version: 1.0
-Contexts: _y0ARECICEeSNosyVI5RXGg,_zV9x4B7REeSLep-9G-ZHeQ
+Contexts: _zV9x4B7REeSLep-9G-ZHeQ
 Element-Name: TestCase1
 Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _fqnBkB7REeSLep-9G-ZHeQ
 Runtime-Version: 1.5.0.201406151150
-Save-Time: 8/12/14 5:43 PM
+Save-Time: 8/12/14 7:57 PM
 Testcase-Type: ecl
 
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac
@@ -40,7 +40,7 @@ with [get-editor "TiApp Editor"] {
 }
 with [get-view "Project Explorer" | get-tree] {
     get-item TestDemo1 | click
-    select TestDemo1 | get-menu "Run As/8 iPhone" | click
+    select TestDemo1 | get-menu "Run As/iPhone Retina (4 inch 64-bit)" | click
 }
 // Loop till the app is launched in the simulator
 loop [val count 0] {
@@ -50,5 +50,10 @@ loop [val count 0] {
 		recur [$count | plus 1]
 	}
 } 
-exec-process "/Applications/SikuliX-IDE.app/Contents/runIDE""-r" "\"/Users/kvelummaylum/Sikuli/Projects/helloworld.sikuli\"""-s"-ignoreExitCode
+exec-process "/Applications/SikuliX-IDE.app/Contents/runIDE""-r" "\"/Users/ssekhri/Downloads/q7pocdemo-master/helloworld.sikuli\"""-s"-ignoreExitCode
+
+with [get-view Console] {
+    get-button Terminate | click
+    get-button "Remove All Terminated Launches" | click
+}
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--
